@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_leaflet::{
-    Color, LatLng, Map, MapOptions, MapPosition, Marker, PathOptions, Polygon, Polyline, Popup,
-    TileLayer,
+    Color, FitBoundsOptions, LatLng, LatLngBounds, Map, MapFitBounds, MapOptions, MapPosition,
+    Marker, PathOptions, Point, Polygon, Polyline, Popup, TileLayer,
 };
 
 mod jersey;
@@ -26,7 +26,22 @@ fn App() -> Element {
         ]]
     });
 
-    let options = use_signal(|| MapOptions::default().with_tile_layer(TileLayer::openstreetmap()));
+    let options = use_signal(|| {
+        MapOptions::default()
+            .with_tile_layer(TileLayer::openstreetmap())
+            .with_fit_bounds(
+                MapFitBounds::new(LatLngBounds::new(
+                    LatLng::new(48.0, -2.5),
+                    LatLng::new(55.0, 13.5),
+                ))
+                .with_options(FitBoundsOptions {
+                    padding: Some(Point::new(40.0, 40.0)),
+                    max_zoom: Some(6.0),
+                    animate: Some(false),
+                    ..Default::default()
+                }),
+            )
+    });
 
     rsx! {
         document::Style { href: CSS }
