@@ -8,7 +8,7 @@ mod popup_options;
 pub use popup_options::PopupOptions;
 
 mod map_options;
-pub use map_options::MapOptions;
+pub use map_options::{FitBoundsOptions, MapFitBounds, MapOptions};
 
 mod tile_layer;
 pub use tile_layer::TileLayer;
@@ -21,6 +21,12 @@ pub use path_options::{Color, LineCap, LineJoin, PathOptions};
 
 mod latlng;
 pub use latlng::LatLng;
+
+mod latlng_bounds;
+pub use latlng_bounds::LatLngBounds;
+
+mod point;
+pub use point::Point;
 
 mod id;
 pub use id::*;

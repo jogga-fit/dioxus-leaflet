@@ -1,9 +1,48 @@
-import type { L, Id, MapOptions, MapPosition, RustCallback, Json } from "./types";
+import type { L, Id, FitBoundsOptions, MapOptions, MapPosition, Point, RustCallback, Json } from "./types";
 import { setup, wait } from "./util";
 
 const _maps = new Map<Id, L.Map>();
 const _callbacks = new Map<Id, (map: L.Map) => void>();
 const _promises = new Map<Id, Promise<L.Map>>();
+
+function toPointExpression(point?: Point | null): L.PointTuple | undefined {
+    return point ? [point.x, point.y] : undefined;
+}
+
+function toFitBoundsOptions(options?: FitBoundsOptions | null): L.FitBoundsOptions {
+    const fitOptions: L.FitBoundsOptions = {};
+
+    const paddingTopLeft = toPointExpression(options?.padding_top_left);
+    const paddingBottomRight = toPointExpression(options?.padding_bottom_right);
+    const padding = toPointExpression(options?.padding);
+
+    if (paddingTopLeft) {
+        fitOptions.paddingTopLeft = paddingTopLeft;
+    }
+    if (paddingBottomRight) {
+        fitOptions.paddingBottomRight = paddingBottomRight;
+    }
+    if (padding) {
+        fitOptions.padding = padding;
+    }
+    if (options?.max_zoom != null) {
+        fitOptions.maxZoom = options.max_zoom;
+    }
+    if (options?.animate != null) {
+        fitOptions.animate = options.animate;
+    }
+    if (options?.duration != null) {
+        fitOptions.duration = options.duration;
+    }
+    if (options?.ease_linearity != null) {
+        fitOptions.easeLinearity = options.ease_linearity;
+    }
+    if (options?.no_move_start != null) {
+        fitOptions.noMoveStart = options.no_move_start;
+    }
+
+    return fitOptions;
+}
 
 export async function get_map(map_id: Id): Promise<L.Map> {
     let map = _maps.get(map_id);
@@ -56,6 +95,15 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
     // Force resize to ensure proper display
     await wait(100);
     map.invalidateSize();
+
+    const fit = options.fit_bounds;
+    if (fit) {
+        const bounds = l.latLngBounds(fit.bounds.south_west, fit.bounds.north_east);
+        const size = map.getSize();
+        if (bounds.isValid() && size.x > 0 && size.y > 0) {
+            map.fitBounds(bounds, toFitBoundsOptions(fit.options));
+        }
+    }
 }
 
 export function delete_map(map_id: Id) {
