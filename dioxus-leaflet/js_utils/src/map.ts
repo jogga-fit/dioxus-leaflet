@@ -107,7 +107,13 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
 }
 
 export function delete_map(map_id: Id) {
+    // Destroy the Leaflet instance (detaches all layers) and drop any pending
+    // get_map waiters so they can't resolve against a future map that happens
+    // to reuse this id.
+    _maps.get(map_id)?.remove();
     _maps.delete(map_id);
+    _callbacks.delete(map_id);
+    _promises.delete(map_id);
 }
 
 export async function on_map_click(map_id: Id, callback: RustCallback<number[], void>): Promise<void> {

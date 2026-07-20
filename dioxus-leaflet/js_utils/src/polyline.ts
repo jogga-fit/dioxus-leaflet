@@ -16,7 +16,13 @@ export async function update_polyline(map_id: Id, polyline_id: Id, coordinates: 
         throw new Error(`Map with id ${map_id} not found when updating polyline ${polyline_id}`);
     }
 
-    const line = _lines.get(polyline_id) ?? l.polyline([]).addTo(map);
+    // A cached line can belong to a previous (destroyed) map instance when
+    // Dioxus reuses scope ids across remounts — re-create it on this map.
+    let line = _lines.get(polyline_id);
+    if (!line || !map.hasLayer(line)) {
+        line?.remove();
+        line = l.polyline([]).addTo(map);
+    }
     _lines.set(polyline_id, line);
 
     line.setLatLngs(coordinates);
@@ -29,16 +35,11 @@ export async function update_polyline(map_id: Id, polyline_id: Id, coordinates: 
     }
 }
 
-export async function delete_polyline(map_id: Id, polyline_id: Id) {
-    const l = await setup();
-    const map = await get_map(map_id);
-    if (!map) {
-        throw new Error(`Map with id ${map_id} not found when deleting polyline ${polyline_id}`);
-    }
-
-    const line = _lines.get(polyline_id);
-    if (line) {
-        line.remove();
-        _lines.delete(polyline_id);
-    }
+export async function delete_polyline(_map_id: Id, polyline_id: Id) {
+    // Never wait for the map here: on unmount delete_map may have already
+    // unregistered it, and awaiting get_map would park this delete until a
+    // future map reuses the id — then remove the *new* polyline.
+    // Layer.remove() works without the map.
+    _lines.get(polyline_id)?.remove();
+    _lines.delete(polyline_id);
 }
