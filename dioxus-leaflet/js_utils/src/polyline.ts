@@ -16,8 +16,8 @@ export async function update_polyline(map_id: Id, polyline_id: Id, coordinates: 
         throw new Error(`Map with id ${map_id} not found when updating polyline ${polyline_id}`);
     }
 
-    // A cached line can belong to a previous (destroyed) map instance when
-    // Dioxus reuses scope ids across remounts — re-create it on this map.
+    // Dioxus can use a scope id again after a remount. Then the cached line can belong to
+    // a previous map instance that Leaflet removed. In this condition, make it again on this map.
     let line = _lines.get(polyline_id);
     if (!line || !map.hasLayer(line)) {
         line?.remove();
@@ -36,10 +36,9 @@ export async function update_polyline(map_id: Id, polyline_id: Id, coordinates: 
 }
 
 export async function delete_polyline(_map_id: Id, polyline_id: Id) {
-    // Never wait for the map here: on unmount delete_map may have already
-    // unregistered it, and awaiting get_map would park this delete until a
-    // future map reuses the id — then remove the *new* polyline.
-    // Layer.remove() works without the map.
+    // Do not wait for the map here. On unmount, `delete_map` can remove the map first.
+    // Then `await get_map` holds this call until a new map gets the same id.
+    // At that time, it removes the *new* polyline. `Layer.remove()` works without the map.
     _lines.get(polyline_id)?.remove();
     _lines.delete(polyline_id);
 }

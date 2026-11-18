@@ -59,4 +59,5 @@ export interface TileLayer {
     attribution: string,
     max_zoom: number,
     subdomains: string[],
+    flavor?: string | null,
 }

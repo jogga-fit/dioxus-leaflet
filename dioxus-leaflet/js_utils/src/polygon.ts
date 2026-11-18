@@ -16,8 +16,8 @@ export async function update_polygon(map_id: Id, polygon_id: Id, coordinates: L.
         throw new Error(`Map with id ${map_id} not found when updating polygon ${polygon_id}`);
     }
 
-    // A cached polygon can belong to a previous (destroyed) map instance when
-    // Dioxus reuses scope ids across remounts — re-create it on this map.
+    // Dioxus can use a scope id again after a remount. Then the cached polygon can belong to
+    // a previous map instance that Leaflet removed. In this condition, make it again on this map.
     let gon = _gons.get(polygon_id);
     if (!gon || !map.hasLayer(gon)) {
         gon?.remove();
@@ -36,9 +36,9 @@ export async function update_polygon(map_id: Id, polygon_id: Id, coordinates: L.
 }
 
 export async function delete_polygon(_map_id: Id, polygon_id: Id) {
-    // Never wait for the map here: on unmount delete_map may have already
-    // unregistered it, and awaiting get_map would park this delete until a
-    // future map reuses the id. Layer.remove() works without the map.
+    // Do not wait for the map here. On unmount, `delete_map` can remove the map first.
+    // Then `await get_map` holds this call until a new map gets the same id.
+    // `Layer.remove()` works without the map.
     _gons.get(polygon_id)?.remove();
     _gons.delete(polygon_id);
 }

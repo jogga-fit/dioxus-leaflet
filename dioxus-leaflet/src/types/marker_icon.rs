@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-/// Custom marker icon configuration
+/// The configuration of a marker icon.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MarkerIcon {
@@ -13,7 +13,7 @@ pub struct MarkerIcon {
 }
 
 impl MarkerIcon {
-    /// Creates a new MarkerIcon with just the URL
+    /// An icon with only a URL. All other fields are `None`.
     pub fn new(icon_url: impl Into<String>) -> Self {
         Self {
             icon_url: icon_url.into(),

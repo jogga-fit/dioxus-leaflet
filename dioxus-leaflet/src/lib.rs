@@ -1,17 +1,17 @@
 //! # Dioxus Leaflet
 //!
-//! A general-purpose Leaflet map component for Dioxus applications.
+//! A general-purpose Leaflet map component for Dioxus apps.
 //!
-//! ## Features
+//! ## Functions
 //!
-//! - Easy-to-use map component with customizable markers
-//! - Support for popups and custom styling
-//! - Extensible marker system
-//! - TypeScript-like props system
-//! - Flexible Leaflet integration: CDN (with version selection) or local files
-//! - Configurable Leaflet resources with integrity checking
+//! - A map component with markers that you can change.
+//! - Popups and your own styles.
+//! - A marker system that you can extend.
+//! - Props that are almost the same as TypeScript props.
+//! - Leaflet from a CDN, at a version that you select, or from local files.
+//! - Leaflet resources with an integrity check.
 //!
-//! ## Basic Usage
+//! ## Basic use
 //!
 //! ```rust
 //! use dioxus::prelude::*;
@@ -36,9 +36,9 @@
 //! }
 //! ```
 //!
-//! ## Advanced Configuration
+//! ## Other configurations
 //!
-//! ### Using a specific Leaflet version from CDN
+//! ### A specified Leaflet version from a CDN
 //!
 //! ```rust
 //! use dioxus::prelude::*;
@@ -59,7 +59,7 @@
 //! }
 //! ```
 //!
-//! ### Using local Leaflet files
+//! ### Local Leaflet files
 //!
 //! ```rust
 //! use dioxus::prelude::*;
@@ -86,7 +86,6 @@ mod components;
 mod interop;
 mod types;
 
-// Re-export main types and components
 pub use components::{Map, Marker, Polygon, Polyline, Popup};
 pub use types::{
     Color, FitBoundsOptions, LatLng, LatLngBounds, LeafletResources, LineCap, LineJoin,

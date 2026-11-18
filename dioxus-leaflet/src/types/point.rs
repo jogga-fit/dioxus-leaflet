@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-/// Represents a point in pixel coordinates.
+/// A point on the screen, in pixels.
 #[derive(Debug, Copy, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Point {
     pub x: f64,

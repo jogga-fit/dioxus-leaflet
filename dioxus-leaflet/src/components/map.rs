@@ -6,37 +6,39 @@ use dioxus::{
 use std::rc::Rc;
 
 const MAP_CSS: Asset = asset!("/assets/dioxus_leaflet.scss");
+const PROTOMAPS_LEAFLET_JS: &str =
+    "https://unpkg.com/protomaps-leaflet@5.1.0/dist/protomaps-leaflet.js";
 
-/// Main map component using Leaflet
+/// The primary map component. Leaflet shows it.
 #[component]
 pub fn Map(
-    /// Initial position of the map
+    /// The position of the map at the start.
     #[props(default = MapPosition::default())]
     initial_position: MapPosition,
 
-    /// Height of the map container
+    /// The height of the map container.
     #[props(into)]
     height: Option<String>,
 
-    /// Width of the map container
+    /// The width of the map container.
     #[props(into)]
     width: Option<String>,
 
-    /// Map configuration options
+    /// The configuration of the map.
     options: Option<MapOptions>,
 
-    /// Custom CSS class for the map container
+    /// An added CSS class for the map container.
     #[props(into)]
     class: Option<String>,
 
-    /// Custom CSS styles for the map container
+    /// Added CSS styles for the map container.
     #[props(into)]
     style: Option<String>,
 
-    /// Callback when map is clicked
+    /// The callback after a click on the map.
     on_click: Option<EventHandler<LatLng>>,
 
-    /// Callback when map is moved
+    /// The callback after the map moves.
     on_move: Option<EventHandler<MapPosition>>,
 
     children: Element,
@@ -45,6 +47,7 @@ pub fn Map(
     let options = options.unwrap_or(MapOptions::default());
     let leaflet_css = options.leaflet_resources.css_url();
     let leaflet_js = options.leaflet_resources.js_url();
+    let vector = options.tile_layer.flavor.is_some();
     let height = height.unwrap_or_else(|| "400px".to_string());
     let width = width.unwrap_or_else(|| "100%".to_string());
     let style = style.unwrap_or_default();
@@ -95,26 +98,29 @@ pub fn Map(
     });
 
     rsx! {
-        // Leaflet CSS
         document::Style { href: leaflet_css }
 
         document::Style { href: MAP_CSS }
 
-        // Leaflet JavaScript
         document::Script { src: leaflet_js }
 
-        // boot logic
+        // protomaps-leaflet is a `GridLayer` that shows the vector tiles on a canvas.
+        if vector {
+            document::Script { src: PROTOMAPS_LEAFLET_JS }
+        }
+
+        // This script starts the map.
         document::Script { src: interop::DL_JS, r#type: "module" }
 
         if let Some(Err(err)) = load_error() {
             p { "{err}" }
         } else {
-            // Keep size/style on the wrapping container so Leaflet can mount reliably.
+            // Keep the dimensions and the style on the outer container. Leaflet must find them there when it puts the map into the page.
             div {
                 class: "dioxus-leaflet-container {class}",
                 style: "height: {height}; width: {width}; {style}",
 
-                // Element taken over by leaflet
+                // Leaflet controls this element.
                 div {
                     id: "dioxus-leaflet-map-{id.id()}",
                     class: "dioxus-leaflet-map",

@@ -1,7 +1,7 @@
 use super::{LatLngBounds, LeafletResources, Point, TileLayer};
 use serde::{Deserialize, Serialize};
 
-/// Options for Leaflet's `fitBounds` map method.
+/// The configuration for the `fitBounds` method of a Leaflet map.
 #[derive(Debug, Copy, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct FitBoundsOptions {
     pub padding_top_left: Option<Point>,
@@ -14,7 +14,7 @@ pub struct FitBoundsOptions {
     pub no_move_start: Option<bool>,
 }
 
-/// Bounds and options Leaflet should fit after the map has initialized.
+/// After the map starts, Leaflet fits the map to this area, with this configuration.
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MapFitBounds {
     pub bounds: LatLngBounds,
@@ -44,7 +44,7 @@ impl MapFitBounds {
     }
 }
 
-/// Map configuration options
+/// The configuration of the map.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MapOptions {
     pub zoom_control: bool,
@@ -77,7 +77,7 @@ impl Default for MapOptions {
 }
 
 impl MapOptions {
-    /// Creates a MapOptions with all controls disabled and default tile layer
+    /// All controls are off. The tile layer is the default.
     pub fn minimal() -> Self {
         Self {
             zoom_control: false,
@@ -93,61 +93,52 @@ impl MapOptions {
         }
     }
 
-    /// Builder method to enable/disable zoom control
     pub fn with_zoom_control(mut self, enabled: bool) -> Self {
         self.zoom_control = enabled;
         self
     }
 
-    /// Builder method to enable/disable scroll wheel zoom
     pub fn with_scroll_wheel_zoom(mut self, enabled: bool) -> Self {
         self.scroll_wheel_zoom = enabled;
         self
     }
 
-    /// Builder method to enable/disable double click zoom
     pub fn with_double_click_zoom(mut self, enabled: bool) -> Self {
         self.double_click_zoom = enabled;
         self
     }
 
-    /// Builder method to enable/disable touch zoom
     pub fn with_touch_zoom(mut self, enabled: bool) -> Self {
         self.touch_zoom = enabled;
         self
     }
 
-    /// Builder method to enable/disable dragging
     pub fn with_dragging(mut self, enabled: bool) -> Self {
         self.dragging = enabled;
         self
     }
 
-    /// Builder method to enable/disable keyboard controls
     pub fn with_keyboard(mut self, enabled: bool) -> Self {
         self.keyboard = enabled;
         self
     }
 
-    /// Builder method to enable/disable attribution control
     pub fn with_attribution_control(mut self, enabled: bool) -> Self {
         self.attribution_control = enabled;
         self
     }
 
-    /// Builder method to set tile layer
     pub fn with_tile_layer(mut self, tile_layer: TileLayer) -> Self {
         self.tile_layer = tile_layer;
         self
     }
 
-    /// Builder method to set Leaflet resources configuration
     pub fn with_leaflet_resources(mut self, resources: LeafletResources) -> Self {
         self.leaflet_resources = resources;
         self
     }
 
-    /// Builder method to fit geographical bounds after map initialization
+    /// Leaflet fits the map to this area after the map starts.
     pub fn with_fit_bounds(mut self, fit_bounds: MapFitBounds) -> Self {
         self.fit_bounds = Some(fit_bounds);
         self

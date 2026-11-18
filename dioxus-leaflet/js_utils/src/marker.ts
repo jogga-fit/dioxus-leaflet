@@ -16,8 +16,8 @@ export async function update_marker(map_id: Id, marker_id: Id, coordinate: L.Lat
         throw new Error(`Map with id ${map_id} not found when updating marker ${marker_id}`);
     }
 
-    // A cached marker can belong to a previous (destroyed) map instance when
-    // Dioxus reuses scope ids across remounts — re-create it on this map.
+    // Dioxus can use a scope id again after a remount. Then the cached marker can belong to
+    // a previous map instance that Leaflet removed. In this condition, make it again on this map.
     let marker = _markers.get(marker_id);
     if (!marker || !map.hasLayer(marker)) {
         marker?.remove();
@@ -38,9 +38,9 @@ export async function update_marker(map_id: Id, marker_id: Id, coordinate: L.Lat
 }
 
 export async function delete_marker(_map_id: Id, marker_id: Id) {
-    // Never wait for the map here: on unmount delete_map may have already
-    // unregistered it, and awaiting get_map would park this delete until a
-    // future map reuses the id — then remove the *new* marker.
+    // Do not wait for the map here. On unmount, `delete_map` can remove the map first.
+    // Then `await get_map` holds this call until a new map gets the same id.
+    // At that time, it removes the *new* marker.
     _markers.get(marker_id)?.remove();
     _markers.delete(marker_id);
 }

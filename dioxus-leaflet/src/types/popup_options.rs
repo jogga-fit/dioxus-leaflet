@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-/// Popup configuration options
+/// The configuration of a popup.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PopupOptions {

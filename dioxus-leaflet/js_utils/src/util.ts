@@ -1,13 +1,15 @@
 import type { L } from "./types";
 
-export async function setup(): Promise<typeof L> {
-    let l = (window as any).L as typeof L;
-    while (!l) {
+export async function global<T>(name: string): Promise<T> {
+    let v = (window as any)[name];
+    while (!v) {
         await wait(100);
-        l = (window as any).L as typeof L;
+        v = (window as any)[name];
     }
-    return l;
+    return v;
 }
+
+export const setup = () => global<typeof L>("L");
 
 export function wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));

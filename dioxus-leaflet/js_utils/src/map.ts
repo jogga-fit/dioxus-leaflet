@@ -1,5 +1,5 @@
 import type { L, Id, FitBoundsOptions, MapOptions, MapPosition, Point, RustCallback, Json } from "./types";
-import { setup, wait } from "./util";
+import { global, setup, wait } from "./util";
 
 const _maps = new Map<Id, L.Map>();
 const _callbacks = new Map<Id, (map: L.Map) => void>();
@@ -62,7 +62,6 @@ export async function get_map(map_id: Id): Promise<L.Map> {
 export async function update_map(map_id: Id, initial_position: MapPosition, options: MapOptions): Promise<void> {
     const l = await setup();
 
-    // Initialize the map with options
     const map = _maps.get(map_id) ?? l.map(`dioxus-leaflet-map-${map_id}`, {
         zoomControl: options.zoom_control,
         scrollWheelZoom: options.scroll_wheel_zoom,
@@ -75,16 +74,17 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
 
     map.setView(initial_position.coordinates, initial_position.zoom);
 
-    // Add tile layer
-    l.tileLayer(options.tile_layer.url, {
-        attribution: options.tile_layer.attribution,
-        maxZoom: options.tile_layer.max_zoom,
-        subdomains: options.tile_layer.subdomains
-    }).addTo(map);
+    // With a flavor, protomaps-leaflet paints vector tiles.
+    const tl = options.tile_layer;
+    const common = { attribution: tl.attribution, maxZoom: tl.max_zoom };
+    (tl.flavor
+        ? (await global<any>("protomapsL")).leafletLayer({ ...common, url: tl.url, flavor: tl.flavor, lang: "en" })
+        : l.tileLayer(tl.url, { ...common, subdomains: tl.subdomains })
+    ).addTo(map);
 
     _maps.set(map_id, map);
 
-    // Resolve any pending promises
+    // Resolve the promises that wait for this map.
     if (_callbacks.has(map_id)) {
         const callback = _callbacks.get(map_id)!;
         callback(map);
@@ -92,7 +92,7 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
         _promises.delete(map_id);
     }
 
-    // Force resize to ensure proper display
+    // Leaflet must measure the container again, or the map does not show correctly.
     await wait(100);
     map.invalidateSize();
 
@@ -107,9 +107,8 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
 }
 
 export function delete_map(map_id: Id) {
-    // Destroy the Leaflet instance (detaches all layers) and drop any pending
-    // get_map waiters so they can't resolve against a future map that happens
-    // to reuse this id.
+    // Remove the Leaflet instance. This removes all layers. Also remove the `get_map` waiters
+    // that no map resolved. If not, a new map with the same id can resolve them.
     _maps.get(map_id)?.remove();
     _maps.delete(map_id);
     _callbacks.delete(map_id);

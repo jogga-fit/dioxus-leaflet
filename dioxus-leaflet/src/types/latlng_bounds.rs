@@ -1,7 +1,7 @@
 use super::LatLng;
 use serde::{Deserialize, Serialize};
 
-/// Represents a rectangular geographical area.
+/// A rectangular geographical area.
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LatLngBounds {
     pub south_west: LatLng,

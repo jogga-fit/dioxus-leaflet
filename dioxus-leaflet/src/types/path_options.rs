@@ -25,33 +25,30 @@ pub enum LineJoin {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PathOptions {
-    /// Whether to draw stroke along the path. Set it to false to disable borders on polygons or circles.
+    /// If `true`, Leaflet shows a line along the path. Set it to `false` to remove the edge of a polygon or a `Circle`.
     pub stroke: bool,
 
-    /// Stroke color
     #[serde(with = "color_format")]
     pub color: Color,
 
-    /// Stroke width in pixels
+    /// The width of the line, in pixels.
     pub weight: u32,
 
-    /// Stroke opacity
     pub opacity: f32,
 
-    /// Defines shape to be used at the end of the stroke.
+    /// The shape at the ends of the line.
     pub line_cap: LineCap,
 
-    /// Defines shape to be used at the corners of the stroke.
+    /// The shape at the corners of the line.
     pub line_join: LineJoin,
 
-    /// Whether to fill the path with color.
+    /// If `true`, Leaflet fills the path with a color.
     pub fill: bool,
 
-    /// Fill color. Defaults to the value of the color option.
+    /// The fill color. The default is the value of `color`.
     #[serde(with = "color_format")]
     pub fill_color: Color,
 
-    /// Fill opacity.
     pub fill_opacity: f32,
 }
 
