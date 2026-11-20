@@ -94,6 +94,10 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
 
     // Leaflet must measure the container again, or the map does not show correctly.
     await wait(100);
+    // The page removed the map during the wait.
+    if (_maps.get(map_id) !== map) {
+        return;
+    }
     map.invalidateSize();
 
     const fit = options.fit_bounds;
@@ -109,7 +113,13 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
 export function delete_map(map_id: Id) {
     // Remove the Leaflet instance. This removes all layers. Also remove the `get_map` waiters
     // that no map resolved. If not, a new map with the same id can resolve them.
-    _maps.get(map_id)?.remove();
+    const map = _maps.get(map_id);
+    if (map) {
+        // Leaflet 1.9 does not stop a zoom animation in `remove`. The timer of the animation then
+        // reads a pane that is gone, and throws.
+        (map as any)._animatingZoom = false;
+        map.remove();
+    }
     _maps.delete(map_id);
     _callbacks.delete(map_id);
     _promises.delete(map_id);
