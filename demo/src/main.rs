@@ -4,12 +4,25 @@ use dioxus_leaflet::{
     Marker, PathOptions, Point, Polygon, Polyline, Popup, TileLayer,
 };
 
+mod follow;
 mod jersey;
 
 const CSS: Asset = asset!("/assets/demo.scss");
 
 #[component]
 fn App() -> Element {
+    let mut follow = use_signal(|| false);
+    rsx! {
+        document::Style { href: CSS }
+        button { id: "page", onclick: move |_| follow.toggle(),
+            if follow() { "Capitals" } else { "Follow" }
+        }
+        if follow() { follow::Follow {} } else { Capitals {} }
+    }
+}
+
+#[component]
+fn Capitals() -> Element {
     let mut markers = use_signal(|| {
         vec![
             ("London", "Capital of the UK", LatLng::new(51.505, -0.09)),
@@ -44,7 +57,6 @@ fn App() -> Element {
     });
 
     rsx! {
-        document::Style { href: CSS }
         Map {
             initial_position: MapPosition::new(51.505, -0.09, 5.0),
             options: options(),

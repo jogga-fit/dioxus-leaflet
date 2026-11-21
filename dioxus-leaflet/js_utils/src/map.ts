@@ -1,4 +1,4 @@
-import type { L, Id, FitBoundsOptions, MapOptions, MapPosition, Point, RustCallback, Json } from "./types";
+import type { L, Id, Drop, FitBoundsOptions, LatLng, MapOptions, MapPosition, Point, RustCallback, Json } from "./types";
 import { global, setup, wait } from "./util";
 
 const _maps = new Map<Id, L.Map>();
@@ -141,14 +141,14 @@ export async function on_map_click(map_id: Id, callback: RustCallback<number[], 
     });
 }
 
-export async function on_map_move(map_id: Id, callback: RustCallback<number[], void>): Promise<void> {
+export async function on_map_move(map_id: Id, callback: RustCallback<number[], void>, drop: Drop): Promise<void> {
     await setup();
     const map = await get_map(map_id);
     if (!map) {
         throw new Error(`Map with id ${map_id} not found when setting onMove handler`);
     }
 
-    map.on("move", async () => {
+    const handler = async () => {
         const center = map.getCenter();
         const zoom = map.getZoom();
         try {
@@ -156,5 +156,41 @@ export async function on_map_move(map_id: Id, callback: RustCallback<number[], v
         } catch (error) {
             console.error("Error in map_on_move callback:", error);
         }
+    };
+    map.on("move", handler);
+    // A pan animation fires `move` after the component drops, until `delete_map` stops it.
+    drop.then(() => map.off("move", handler));
+}
+
+export async function on_map_drag(map_id: Id, callback: RustCallback<void, void>): Promise<void> {
+    const map = await get_map(map_id);
+    // Only a drag by the user fires `dragstart`. A `panTo` call does not.
+    map.on("dragstart", async () => {
+        try {
+            await callback();
+        } catch (error) {
+            console.error("Error in on_map_drag callback:", error);
+        }
     });
+}
+
+const ZOOM_GESTURES = ["touchZoom", "scrollWheelZoom", "doubleClickZoom"] as const;
+
+export async function follow_map(map_id: Id, center: LatLng | null): Promise<void> {
+    const map = await get_map(map_id);
+    // The page removed the map during the wait.
+    if (_maps.get(map_id) !== map) {
+        return;
+    }
+    // Leaflet reads these options at the start of each gesture. "center" zooms about the center
+    // of the map. The value is `true` or "center" only when `MapOptions` turned the gesture on.
+    for (const gesture of ZOOM_GESTURES) {
+        if (map.options[gesture]) {
+            map.options[gesture] = center ? "center" : true;
+        }
+    }
+    if (center) {
+        // A linear glide of 1 s fits a position that arrives about once each second.
+        map.panTo(center, { animate: true, duration: 1, easeLinearity: 1 });
+    }
 }

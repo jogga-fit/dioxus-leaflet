@@ -3,6 +3,7 @@ use dioxus::{
     core::{spawn_forever, use_drop},
     prelude::*,
 };
+use dioxus_logger::tracing::error;
 use std::rc::Rc;
 
 const MAP_CSS: Asset = asset!("/assets/dioxus_leaflet.scss");
@@ -15,6 +16,10 @@ pub fn Map(
     /// The position of the map at the start.
     #[props(default = MapPosition::default())]
     initial_position: MapPosition,
+
+    /// While `Some`, the map keeps this point in its middle. Zoom gestures then zoom about the middle.
+    #[props(default = None)]
+    center: ReadSignal<Option<LatLng>>,
 
     /// The height of the map container.
     #[props(into)]
@@ -40,6 +45,9 @@ pub fn Map(
 
     /// The callback after the map moves.
     on_move: Option<EventHandler<MapPosition>>,
+
+    /// The callback when the user starts to pull the map. A move from `center` does not cause it.
+    on_drag: Option<EventHandler<()>>,
 
     children: Element,
 ) -> Element {
@@ -87,6 +95,29 @@ pub fn Map(
                 Ok(())
             }
         }
+    });
+
+    let id2 = id.clone();
+    let _drag_handle = use_resource(move || {
+        let id = id2.clone();
+        async move {
+            if let Some(on_drag) = on_drag {
+                interop::on_map_drag(&id, on_drag).await
+            } else {
+                Ok(())
+            }
+        }
+    });
+
+    let id2 = id.clone();
+    use_effect(move || {
+        let id = id2.clone();
+        let center = center();
+        spawn(async move {
+            if let Err(e) = interop::follow_map(&id, center.as_ref()).await {
+                error!("Error following center: {e}");
+            }
+        });
     });
 
     let id2 = id.clone();

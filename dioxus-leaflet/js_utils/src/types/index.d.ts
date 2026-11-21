@@ -2,6 +2,7 @@ export * as L from "./leaflet";
 
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 export type RustCallback<A, R> = (arg: A) => Promise<R>;
+export type Drop = Promise<void>;
 
 export type Id = number;
 
@@ -15,6 +16,8 @@ export interface MapPosition {
     coordinates: LatLng,
     zoom: number,
 }
+
+export type MarkerIcon = L.IconOptions | (L.DivIconOptions & { html: string });
 
 export interface Point {
     x: number,

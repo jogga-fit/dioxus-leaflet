@@ -142,6 +142,8 @@ rsx! {
 | `on_marker_click` | `EventHandler<MapMarker>` | None | The callback after a click on a marker |
 | `on_map_click` | `EventHandler<MapPosition>` | None | The callback after a click on the map |
 | `on_map_move` | `EventHandler<MapPosition>` | None | The callback after the map moves |
+| `center` | `ReadSignal<Option<LatLng>>` | `None` | While `Some`, the map pans to keep this point at its center, and zoom gestures zoom about the center |
+| `on_drag` | `EventHandler<()>` | None | The callback when the user starts to drag the map. A pan from `center` does not call it |
 
 ## Leaflet Resources Configuration
 
@@ -226,6 +228,17 @@ let custom_icon = MarkerIcon::new("https://example.com/custom-icon.png")
 
 let marker = MapMarker::new(51.505, -0.09, "Custom Marker")
     .with_icon(custom_icon);
+```
+
+An icon from HTML (`L.divIcon`). Your CSS styles it. With no `class_name`, the icon has no Leaflet box:
+
+```rust
+let dot = MarkerIcon::Html {
+    html: r#"<div class="dot"></div>"#.into(),
+    class_name: None,
+    icon_size: Some((24, 24)),
+    icon_anchor: Some((12, 12)),
+};
 ```
 
 ## Map Configuration

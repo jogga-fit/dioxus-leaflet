@@ -10,7 +10,7 @@ mod js_api {
     use dioxus::prelude::*;
     use dioxus_use_js::use_js;
 
-    use_js!("js_utils/src/map.ts", "assets/dioxus_leaflet.js"::{update_map, delete_map, on_map_click, on_map_move});
+    use_js!("js_utils/src/map.ts", "assets/dioxus_leaflet.js"::{update_map, delete_map, on_map_click, on_map_move, on_map_drag, follow_map});
     use_js!("js_utils/src/marker.ts", "assets/dioxus_leaflet.js"::{update_marker, delete_marker});
     use_js!("js_utils/src/polygon.ts", "assets/dioxus_leaflet.js"::{update_polygon, delete_polygon});
     use_js!("js_utils/src/polyline.ts", "assets/dioxus_leaflet.js"::{update_polyline, delete_polyline});
@@ -66,6 +66,26 @@ pub async fn on_map_move(
     js_api::on_map_move(map_id, mapper_cb)
         .await
         .map_err(js_to_eval)
+}
+
+pub async fn on_map_drag(
+    map_id: &Id,
+    callback: EventHandler<()>,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let mapper_cb = Callback::new(move |()| async move {
+        callback.call(());
+        Result::<(), SerdeJsonValue>::Ok(())
+    });
+    js_api::on_map_drag(map_id, mapper_cb)
+        .await
+        .map_err(js_to_eval)
+}
+
+pub async fn follow_map(
+    map_id: &Id,
+    center: Option<&LatLng>,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    js_api::follow_map(map_id, center).await.map_err(js_to_eval)
 }
 
 pub async fn update_marker(

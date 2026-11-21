@@ -1,4 +1,4 @@
-import type { L, Id } from "./types";
+import type { L, Id, MarkerIcon } from "./types";
 import { get_map } from "./map";
 import { setup } from "./util";
 import { get_popup } from "./popup";
@@ -9,7 +9,7 @@ export function get_marker(marker_id: Id): L.Marker | undefined {
     return _markers.get(marker_id);
 }
 
-export async function update_marker(map_id: Id, marker_id: Id, coordinate: L.LatLngExpression, icon?: L.IconOptions) {
+export async function update_marker(map_id: Id, marker_id: Id, coordinate: L.LatLngExpression, icon?: MarkerIcon) {
     const l = await setup();
     const map = await get_map(map_id);
     if (!map) {
@@ -27,7 +27,8 @@ export async function update_marker(map_id: Id, marker_id: Id, coordinate: L.Lat
 
     marker.setLatLng(coordinate);
     if (icon) {
-        marker.setIcon(l.icon(icon));
+        // Leaflet gives a div icon the class `leaflet-div-icon`, which paints a white box.
+        marker.setIcon("html" in icon ? l.divIcon({ ...icon, className: icon.className ?? "" }) : l.icon(icon));
     }
 
     const popup = get_popup(marker_id);
