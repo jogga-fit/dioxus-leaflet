@@ -60,6 +60,7 @@ export interface MapOptions {
 export interface TileLayer {
     url: string,
     attribution: string,
+    min_zoom: number,
     max_zoom: number,
     subdomains: string[],
     flavor?: string | null,

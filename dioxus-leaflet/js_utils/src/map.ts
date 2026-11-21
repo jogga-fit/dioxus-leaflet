@@ -76,7 +76,7 @@ export async function update_map(map_id: Id, initial_position: MapPosition, opti
 
     // With a flavor, protomaps-leaflet paints vector tiles.
     const tl = options.tile_layer;
-    const common = { attribution: tl.attribution, maxZoom: tl.max_zoom };
+    const common = { attribution: tl.attribution, minZoom: tl.min_zoom, maxZoom: tl.max_zoom };
     (tl.flavor
         ? (await global<any>("protomapsL")).leafletLayer({ ...common, url: tl.url, flavor: tl.flavor, lang: "en" })
         : l.tileLayer(tl.url, { ...common, subdomains: tl.subdomains })

@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 pub struct TileLayer {
     pub url: String,
     pub attribution: String,
+    /// With `max_zoom`, the limits of the zoom of the map.
+    #[serde(default)]
+    pub min_zoom: u8,
     pub max_zoom: u8,
     pub subdomains: Vec<String>,
     /// A protomaps-leaflet flavor: `light`, `dark`, `white`, `grayscale` or `black`.
@@ -20,6 +23,7 @@ impl TileLayer {
         Self {
             url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png".to_string(),
             attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors".to_string(),
+            min_zoom: 0,
             max_zoom: 19,
             subdomains: vec!["a".to_string(), "b".to_string(), "c".to_string()],
             flavor: None,
@@ -31,6 +35,7 @@ impl TileLayer {
         Self {
             url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}".to_string(),
             attribution: "Tiles &copy; Esri".to_string(),
+            min_zoom: 0,
             max_zoom: 18,
             subdomains: vec![],
             flavor: None,
